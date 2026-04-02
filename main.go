@@ -362,4 +362,6 @@ func main() {
 	if err := http.ListenAndServe(":"+port, handler); err != nil {
 		log.Fatalf("Erro ao iniciar servidor: %v", err)
 	}
+
+	//log de flavo
 }
