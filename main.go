@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"log"
 	"math/rand"
 	"net/http"
@@ -94,16 +93,6 @@ type Question struct {
 }
 
 // ─── Handlers ─────────────────────────────────────────────────────────────────
-
-// GET /
-func handleRoot(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Hello world!")
-}
-
-// GET /api/health
-func handleHealth(w http.ResponseWriter, r *http.Request) {
-	writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
-}
 
 // POST /api/players
 // Body: { "name": "Flávio Mesquita" }
@@ -279,20 +268,30 @@ func handleQuestions(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var questions []Question
-	var err error
 
 	switch mode {
 	case "easy":
+		var err error
 		questions, err = fetchQuestions("easy", total)
+		if err != nil {
+			writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "Erro ao buscar questões"})
+			return
+		}
 	case "hard":
+		var err error
 		questions, err = fetchQuestions("hard", total)
+		if err != nil {
+			writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "Erro ao buscar questões"})
+			return
+		}
 	case "medium":
 		half := total / 2
 		rest := total - half
 		easyQ, e1 := fetchQuestions("easy", half)
 		hardQ, e2 := fetchQuestions("hard", rest)
 		if e1 != nil || e2 != nil {
-			err = fmt.Errorf("erro ao buscar questões")
+			writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "Erro ao buscar questões"})
+			return
 		} else {
 			questions = append(easyQ, hardQ...)
 			// Embaralha
@@ -300,11 +299,6 @@ func handleQuestions(w http.ResponseWriter, r *http.Request) {
 				questions[i], questions[j] = questions[j], questions[i]
 			})
 		}
-	}
-
-	if err != nil {
-		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "Erro ao buscar questões"})
-		return
 	}
 
 	writeJSON(w, http.StatusOK, map[string]any{
@@ -344,8 +338,6 @@ func main() {
 	initDB()
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /", handleRoot)
-	mux.HandleFunc("GET /api/health", handleHealth)
 	mux.HandleFunc("POST /api/players", handleCreatePlayer)
 	mux.HandleFunc("POST /api/scores", handleCreateScore)
 	mux.HandleFunc("GET /api/ranking", handleRanking)
@@ -363,5 +355,5 @@ func main() {
 		log.Fatalf("Erro ao iniciar servidor: %v", err)
 	}
 
-	//log de flavo
+	// 2 log flavio
 }
