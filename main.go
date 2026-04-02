@@ -108,11 +108,6 @@ func handleHealth(w http.ResponseWriter, r *http.Request) {
 // POST /api/players
 // Body: { "name": "Flávio Mesquita" }
 func handleCreatePlayer(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		writeJSON(w, http.StatusMethodNotAllowed, map[string]string{"error": "método não permitido"})
-		return
-	}
-
 	var body struct {
 		Name string `json:"name"`
 	}
@@ -155,11 +150,6 @@ func handleCreatePlayer(w http.ResponseWriter, r *http.Request) {
 // POST /api/scores
 // Body: { "name": "Flávio Mesquita", "score": 100, "mode": "easy" | "medium" | "hard" }
 func handleCreateScore(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		writeJSON(w, http.StatusMethodNotAllowed, map[string]string{"error": "método não permitido"})
-		return
-	}
-
 	var body struct {
 		Name  string `json:"name"`
 		Score int    `json:"score"`
@@ -208,11 +198,6 @@ func handleCreateScore(w http.ResponseWriter, r *http.Request) {
 
 // GET /api/ranking?mode=easy&limit=20
 func handleRanking(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		writeJSON(w, http.StatusMethodNotAllowed, map[string]string{"error": "método não permitido"})
-		return
-	}
-
 	mode := r.URL.Query().Get("mode")
 	limitStr := r.URL.Query().Get("limit")
 	limit := 20
@@ -272,11 +257,6 @@ func handleRanking(w http.ResponseWriter, r *http.Request) {
 // mode:  easy (todas fáceis) | medium (metade+metade) | hard (todas difíceis)
 // total: 5 | 10 | 15
 func handleQuestions(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		writeJSON(w, http.StatusMethodNotAllowed, map[string]string{"error": "método não permitido"})
-		return
-	}
-
 	mode := r.URL.Query().Get("mode")
 	totalStr := r.URL.Query().Get("total")
 
@@ -364,12 +344,12 @@ func main() {
 	initDB()
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/", handleRoot)
-	mux.HandleFunc("/api/health", handleHealth)
-	mux.HandleFunc("/api/players", handleCreatePlayer)
-	mux.HandleFunc("/api/scores", handleCreateScore)
-	mux.HandleFunc("/api/ranking", handleRanking)
-	mux.HandleFunc("/api/questions", handleQuestions)
+	mux.HandleFunc("GET /", handleRoot)
+	mux.HandleFunc("GET /api/health", handleHealth)
+	mux.HandleFunc("POST /api/players", handleCreatePlayer)
+	mux.HandleFunc("POST /api/scores", handleCreateScore)
+	mux.HandleFunc("GET /api/ranking", handleRanking)
+	mux.HandleFunc("GET /api/questions", handleQuestions)
 
 	port := os.Getenv("PORT")
 	if port == "" {
